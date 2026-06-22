@@ -56,7 +56,7 @@ class ProcessResponse(BaseModel):
 class Section(BaseModel):
     id: str = Field(description="Unique identifier for the section")
     heading: str = Field(description="Descriptive heading for this section")
-    content: str = Field(description="Section content (2-4 paragraphs)")
+    content: str = Field(description="Concise 2-4 sentence summary of the section (not verbatim source text)")
     order: int = Field(description="Order of this section in the article")
 
     @field_validator("id", mode="before")

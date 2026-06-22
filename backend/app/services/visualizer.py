@@ -73,7 +73,8 @@ def normalize_sections(value) -> list[dict]:
 SECTION_BREAKDOWN_PROMPT = """You are analyzing an article to create digestible sections for readers. Your job is to split the content into logical, self-contained sections that each cover one main idea.
 
 Rules:
-- Each section should be 2-4 paragraphs of content
+- Each section's content should be a brief 2-4 sentence summary capturing the main idea, not the verbatim source text
+- Include only a short representative quote/excerpt where helpful; do not reproduce full paragraphs
 - Create clear, descriptive headings that tell the reader what each section covers
 - Preserve the original meaning and flow of the article
 - Aim for 4-8 sections total for a standard-length article
@@ -82,7 +83,7 @@ Rules:
 Return your response as a JSON array of sections. Each section must have:
 - id: a unique identifier (e.g., "section-1", "section-2")
 - heading: a descriptive title for the section
-- content: the full text of this section (may contain multiple paragraphs separated by newlines)
+- content: a concise 2-4 sentence summary of this section (NOT the full verbatim text)
 - order: the position of this section in the article (starting from 1)
 
 Article content:
