@@ -1,4 +1,8 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field, field_validator
+
+Provider = Literal["openai", "anthropic", "openrouter", "ollama", "omxl"]
 
 
 class HealthResponse(BaseModel):
@@ -39,7 +43,7 @@ class LLMResponse(BaseModel):
 class ProcessRequest(BaseModel):
     article_id: str
     paragraphs: list[str]
-    provider: str = "openai"
+    provider: Provider = "openai"
     api_key: str = ""
     base_url: str = ""
     model: str = ""
