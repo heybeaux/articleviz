@@ -134,4 +134,4 @@ Contributions are welcome.
 
 ## 📄 License
 
-No license file is present yet. Add a `LICENSE` before distributing.
+Released under the [MIT License](LICENSE).
