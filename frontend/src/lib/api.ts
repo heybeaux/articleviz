@@ -267,7 +267,7 @@ export async function processArticle(
     base_url: string;
     model: string;
   }>(
-    "/api/process",
+    "/api/process?sync=true",
     { article_id: articleId, paragraphs, provider, api_key: apiKey, base_url: baseUrl, model }
   );
   return new AnalysisResponse(data);

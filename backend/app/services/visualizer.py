@@ -1,4 +1,6 @@
+import asyncio
 import json
+from typing import Awaitable, Callable, TypeVar
 
 from app.models import (
     AnalysisResponse,
@@ -13,6 +15,32 @@ from pydantic import TypeAdapter
 
 section_list_adapter = TypeAdapter(list[Section])
 glossary_list_adapter = TypeAdapter(list[GlossaryEntry])
+
+T = TypeVar("T")
+
+
+async def retry_async(
+    func: Callable[[], Awaitable[T]],
+    *,
+    max_attempts: int = 3,
+    base_delay: float = 0.5,
+    on_attempt: Callable[[int], None] | None = None,
+) -> T:
+    last_exc: Exception | None = None
+
+    for attempt in range(1, max_attempts + 1):
+        if on_attempt is not None:
+            on_attempt(attempt)
+        try:
+            return await func()
+        except Exception as exc:
+            last_exc = exc
+            if attempt >= max_attempts:
+                break
+            await asyncio.sleep(base_delay * (2 ** (attempt - 1)))
+
+    assert last_exc is not None
+    raise last_exc
 
 
 def parse_json_content(content: str):
@@ -73,7 +101,8 @@ def normalize_sections(value) -> list[dict]:
 SECTION_BREAKDOWN_PROMPT = """You are analyzing an article to create digestible sections for readers. Your job is to split the content into logical, self-contained sections that each cover one main idea.
 
 Rules:
-- Each section should be 2-4 paragraphs of content
+- Each section's content should be a brief 2-4 sentence summary capturing the main idea, not the verbatim source text
+- Include only a short representative quote/excerpt where helpful; do not reproduce full paragraphs
 - Create clear, descriptive headings that tell the reader what each section covers
 - Preserve the original meaning and flow of the article
 - Aim for 4-8 sections total for a standard-length article
@@ -82,7 +111,7 @@ Rules:
 Return your response as a JSON array of sections. Each section must have:
 - id: a unique identifier (e.g., "section-1", "section-2")
 - heading: a descriptive title for the section
-- content: the full text of this section (may contain multiple paragraphs separated by newlines)
+- content: a concise 2-4 sentence summary of this section (NOT the full verbatim text)
 - order: the position of this section in the article (starting from 1)
 
 Article content:

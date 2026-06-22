@@ -1,4 +1,8 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field, field_validator
+
+Provider = Literal["openai", "anthropic", "openrouter", "ollama", "omxl"]
 
 
 class HealthResponse(BaseModel):
@@ -39,7 +43,7 @@ class LLMResponse(BaseModel):
 class ProcessRequest(BaseModel):
     article_id: str
     paragraphs: list[str]
-    provider: str = "openai"
+    provider: Provider = "openai"
     api_key: str = ""
     base_url: str = ""
     model: str = ""
@@ -52,7 +56,7 @@ class ProcessResponse(BaseModel):
 class Section(BaseModel):
     id: str = Field(description="Unique identifier for the section")
     heading: str = Field(description="Descriptive heading for this section")
-    content: str = Field(description="Section content (2-4 paragraphs)")
+    content: str = Field(description="Concise 2-4 sentence summary of the section (not verbatim source text)")
     order: int = Field(description="Order of this section in the article")
 
     @field_validator("id", mode="before")
@@ -104,3 +108,36 @@ class AnalysisResponse(BaseModel):
     concept_map: ConceptMap = Field(description="Key concepts and their relationships")
     glossary: list[GlossaryEntry] = Field(description="Domain-specific terms with definitions")
     summary: Summary = Field(description="TL;DR and key takeaways")
+
+
+StageStatus = Literal["pending", "running", "complete", "failed"]
+JobStatus = Literal["pending", "running", "partial", "complete", "failed"]
+
+
+class StageState(BaseModel):
+    status: StageStatus = "pending"
+    attempts: int = Field(default=0, description="Number of attempts made for this stage")
+    error: str | None = Field(default=None, description="Error message if this stage failed")
+
+
+class JobStages(BaseModel):
+    sections: StageState = Field(default_factory=StageState)
+    concept_map: StageState = Field(default_factory=StageState)
+    glossary: StageState = Field(default_factory=StageState)
+    summary: StageState = Field(default_factory=StageState)
+
+
+class JobPartialResults(BaseModel):
+    sections: list[Section] | None = None
+    concept_map: ConceptMap | None = None
+    glossary: list[GlossaryEntry] | None = None
+    summary: Summary | None = None
+
+
+class JobStatusResponse(BaseModel):
+    job_id: str = Field(description="Unique identifier for this analysis job")
+    article_id: str = Field(description="Article this job is analyzing")
+    status: JobStatus = Field(default="pending", description="Overall job status")
+    stages: JobStages = Field(default_factory=JobStages, description="Per-stage status and error info")
+    results: JobPartialResults = Field(default_factory=JobPartialResults, description="Partial results as each stage lands")
+    error: str | None = Field(default=None, description="Job-level error if the job failed catastrophically")
