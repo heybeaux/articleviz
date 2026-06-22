@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Build output
+.next/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# OpenSpec
+openspec/.state/
+
+# Logs
+*.log
+
+# Internal Fugu eval artifacts (kept local, not for public repo)
+docs/fugu/
+docs/reviews/

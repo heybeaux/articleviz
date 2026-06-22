@@ -1,0 +1,21 @@
+schema: spec-driven
+
+context: |
+  Project: ArticleViz — transforms articles into interactive, ADHD-friendly web experiences.
+  Tech stack: Next.js (React/TypeScript) frontend, FastAPI (Python) backend, Docker Compose.
+  LLM providers: OpenAI, Anthropic, OpenRouter, Ollama (local), OMXL.
+  Design philosophy: fluid, iterative, lightweight, neurodiversity-first accessibility.
+
+rules:
+  proposal:
+    - Identify the specific ADHD/neurodiversity need being addressed
+    - Clearly separate in-scope from out-of-scope items
+  specs:
+    - Use Given/When/Then scenario format
+    - Use RFC 2119 keywords (SHALL, MUST, SHOULD)
+  design:
+    - Document architecture decisions and rationale
+    - List all file changes expected
+  tasks:
+    - Group related tasks under numbered headings
+    - Use hierarchical numbering (1.1, 1.2, etc.)

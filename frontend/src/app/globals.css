@@ -1,0 +1,178 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base (Inter) ─────────────────────────────────── */
+:root {
+  --color-background: #ffffff;
+  --color-foreground: #171717;
+
+  /* Primary palette */
+  --color-primary-50: #f0f9ff;
+  --color-primary-100: #e0f2fe;
+  --color-primary-200: #bae6fd;
+  --color-primary-300: #7dd3fc;
+  --color-primary-400: #38bdf8;
+  --color-primary-500: #0ea5e9;
+  --color-primary-600: #0284c7;
+  --color-primary-700: #0369a1;
+  --color-primary-800: #075985;
+  --color-primary-900: #0c4a6e;
+
+  /* Success / danger */
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+
+  /* Node category colors */
+  --color-node-main: #0ea5e9;
+  --color-node-supporting: #8b5cf6;
+  --color-node-example: #10b981;
+  --color-node-method: #f59e0b;
+  --color-node-result: #ef4444;
+
+  /* Slate tones */
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+
+  /* Font */
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+/* ── Lexend font ──────────────────────────────────── */
+[data-font="lexend"] {
+  --font-body: "Lexend", system-ui, -apple-system, sans-serif;
+}
+
+/* ── Atkinson Hyperlegible font ───────────────────── */
+[data-font="atkinson"] {
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+}
+
+/* ── Protanopia-safe palette (red-blind) ─────────── */
+[data-color-mode="protanopia"] {
+  --color-primary-50: #f0f7ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+
+  --color-success: #059669;
+  --color-danger: #dc2626;
+
+  --color-node-main: #3b82f6;
+  --color-node-supporting: #a855f7;
+  --color-node-example: #059669;
+  --color-node-method: #d97706;
+  --color-node-result: #dc2626;
+
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #eef2f6;
+  --color-slate-200: #dce3ec;
+  --color-slate-300: #b8c4d4;
+  --color-slate-400: #8a96a8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #4a5568;
+  --color-slate-700: #374151;
+  --color-slate-800: #1f2937;
+  --color-slate-900: #111827;
+}
+
+/* ── Deuteranopia-safe palette (green-blind) ─────── */
+[data-color-mode="deuteranopia"] {
+  --color-primary-50: #fef7ed;
+  --color-primary-100: #fde6c8;
+  --color-primary-200: #fcc894;
+  --color-primary-300: #faa75c;
+  --color-primary-400: #f89236;
+  --color-primary-500: #e8710f;
+  --color-primary-600: #c25a08;
+  --color-primary-700: #9a4606;
+  --color-primary-800: #753505;
+  --color-primary-900: #5a2a04;
+
+  --color-success: #0284c7;
+  --color-danger: #dc2626;
+
+  --color-node-main: #e8710f;
+  --color-node-supporting: #a855f7;
+  --color-node-example: #0284c7;
+  --color-node-method: #d97706;
+  --color-node-result: #dc2626;
+
+  --color-slate-50: #fefce8;
+  --color-slate-100: #fef9c3;
+  --color-slate-200: #fef08a;
+  --color-slate-300: #fde047;
+  --color-slate-400: #a1a1aa;
+  --color-slate-500: #78716c;
+  --color-slate-600: #57534e;
+  --color-slate-700: #44403c;
+  --color-slate-800: #292524;
+  --color-slate-900: #1c1917;
+}
+
+/* ── Tritanopia-safe palette (blue-blind) ────────── */
+[data-color-mode="tritanopia"] {
+  --color-primary-50: #f0fdf4;
+  --color-primary-100: #dcfce7;
+  --color-primary-200: #bbf7d0;
+  --color-primary-300: #86efac;
+  --color-primary-400: #4ade80;
+  --color-primary-500: #22c55e;
+  --color-primary-600: #16a34a;
+  --color-primary-700: #15803d;
+  --color-primary-800: #166534;
+  --color-primary-900: #14532d;
+
+  --color-success: #0ea5e9;
+  --color-danger: #ef4444;
+
+  --color-node-main: #22c55e;
+  --color-node-supporting: #a855f7;
+  --color-node-example: #0ea5e9;
+  --color-node-method: #f59e0b;
+  --color-node-result: #ef4444;
+
+  --color-slate-50: #f0fdfa;
+  --color-slate-100: #ccfbf1;
+  --color-slate-200: #99f6e4;
+  --color-slate-300: #5eead4;
+  --color-slate-400: #99a7b0;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+}
+
+/* ── Apply font globally ─────────────────────────── */
+body {
+  color: var(--color-foreground);
+  background: var(--color-background);
+  font-family: var(--font-body);
+}
+
+/* ── Reduced motion ──────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
