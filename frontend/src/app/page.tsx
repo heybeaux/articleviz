@@ -220,6 +220,7 @@ export default function Home() {
                 activeTab={activeTab}
                 file={selectedFile}
                 onFileSelect={handleFileValidation}
+                onValidationError={setFileError}
                 error={fileError}
               />
             )}

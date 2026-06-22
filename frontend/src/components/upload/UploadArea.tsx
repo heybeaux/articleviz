@@ -4,14 +4,39 @@ interface UploadAreaProps {
   activeTab: "pdf" | "docx";
   file: File | null;
   onFileSelect: (file: File | null) => void;
+  onValidationError?: (msg: string) => void;
   error: string | null;
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ACCEPT_MAP = { pdf: ".pdf", docx: ".docx" };
 
-export function UploadArea({ activeTab, file, onFileSelect, error }: UploadAreaProps) {
+export function UploadArea({
+  activeTab,
+  file,
+  onFileSelect,
+  onValidationError,
+  error,
+}: UploadAreaProps) {
   const [dragging, setDragging] = useState(false);
+
+  const validateFile = useCallback(
+    (fileToValidate: File): string | null => {
+      const allowedExtension = ACCEPT_MAP[activeTab].slice(1);
+      const extension = fileToValidate.name.toLowerCase().split(".").pop();
+
+      if (extension !== allowedExtension) {
+        return `Invalid file type. Please upload a ${allowedExtension.toUpperCase()} file.`;
+      }
+
+      if (fileToValidate.size > MAX_FILE_SIZE) {
+        return "File is too large. Maximum size is 10 MB.";
+      }
+
+      return null;
+    },
+    [activeTab]
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -29,18 +54,34 @@ export function UploadArea({ activeTab, file, onFileSelect, error }: UploadAreaP
       setDragging(false);
       const dropped = e.dataTransfer.files[0];
       if (dropped) {
+        const validationError = validateFile(dropped);
+        if (validationError) {
+          onFileSelect(null);
+          onValidationError?.(validationError);
+          return;
+        }
+
         onFileSelect(dropped);
       }
     },
-    [onFileSelect]
+    [onFileSelect, onValidationError, validateFile]
   );
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const selected = e.target.files?.[0] || null;
+      if (selected) {
+        const validationError = validateFile(selected);
+        if (validationError) {
+          onFileSelect(null);
+          onValidationError?.(validationError);
+          return;
+        }
+      }
+
       onFileSelect(selected);
     },
-    [onFileSelect]
+    [onFileSelect, onValidationError, validateFile]
   );
 
   const accept = ACCEPT_MAP[activeTab];
