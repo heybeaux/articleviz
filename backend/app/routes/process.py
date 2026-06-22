@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import uuid
 
 from fastapi import APIRouter, HTTPException, Response
@@ -9,10 +10,12 @@ from app.models import (
     ProcessRequest,
 )
 from app.services.llm import LLMClient, LLMClientConfig
+from app.services.llm_settings import key_store, provider_requires_key, redact_secrets
 from app.services.visualizer import Visualizer, retry_async
 from app.routes.articles import ArticleStore
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 class JobStore:
@@ -92,10 +95,10 @@ async def run_job(job: JobStatusResponse, article_text: str, visualizer: Visuali
         job.status = "partial"
 
 
-def _build_visualizer(request: ProcessRequest) -> Visualizer:
+def _build_visualizer(request: ProcessRequest, api_key: str) -> Visualizer:
     config = LLMClientConfig(
         provider=request.provider,
-        api_key=request.api_key,
+        api_key=api_key,
         base_url=request.base_url,
         model=request.model,
     )
@@ -107,17 +110,23 @@ async def process_article(request: ProcessRequest, response: Response, sync: boo
     if not request.paragraphs:
         raise HTTPException(status_code=400, detail="Article paragraphs are required")
 
-    if request.provider not in {"ollama", "omxl"} and not request.api_key:
-        raise HTTPException(status_code=400, detail="API key is required for LLM calls")
+    try:
+        api_key = key_store.get_api_key(request.provider)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Unknown LLM provider")
+
+    if provider_requires_key(request.provider) and not api_key:
+        raise HTTPException(status_code=400, detail="API key is not configured for the selected LLM provider")
 
     article_text = "\n\n".join(request.paragraphs)
-    visualizer = _build_visualizer(request)
+    visualizer = _build_visualizer(request, api_key)
 
     if sync:
         try:
             analysis = await visualizer.analyze_article(article_text)
         except Exception as e:
-            raise HTTPException(status_code=502, detail=f"Analysis failed: {str(e)}")
+            logger.warning("Analysis failed for provider=%s: %s", request.provider, redact_secrets(e))
+            raise HTTPException(status_code=502, detail="Analysis failed; check server-side LLM configuration")
 
         ArticleStore.save_analysis(request.article_id, analysis.model_dump())
         return analysis

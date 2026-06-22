@@ -23,14 +23,20 @@ class UploadResponse(BaseModel):
 
 class LLMSettingsRequest(BaseModel):
     provider: str = "openai"
-    api_key: str = ""
+    api_key: str | None = None
     base_url: str = ""
+
+
+class LLMKeyRotationRequest(BaseModel):
+    provider: str = "openai"
+    api_key: str
+    base_url: str | None = None
 
 
 class LLMSettingsResponse(BaseModel):
     provider: str
-    api_key: str = ""
     base_url: str = ""
+    has_key: bool = False
 
 
 class LLMResponse(BaseModel):
@@ -44,7 +50,6 @@ class ProcessRequest(BaseModel):
     article_id: str
     paragraphs: list[str]
     provider: Provider = "openai"
-    api_key: str = ""
     base_url: str = ""
     model: str = ""
 
