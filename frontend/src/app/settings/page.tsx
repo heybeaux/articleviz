@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getLlmSettings, saveLlmSettings, checkOllama } from "@/lib/api";
+import { clearLlmSettings, getLlmSettings, saveLlmSettings, checkOllama } from "@/lib/api";
 import { ApiKeyForm } from "@/components/settings/ApiKeyForm";
 import { FontToggle } from "@/components/ui/FontToggle";
 import { ColorModeToggle } from "@/components/ui/ColorModeToggle";
@@ -11,6 +11,7 @@ interface LLMSettings {
   provider: string;
   api_key: string;
   base_url: string;
+  has_key: boolean;
 }
 
 const PROVIDERS = [
@@ -56,6 +57,7 @@ export default function SettingsPage() {
     provider: "openai",
     api_key: "",
     base_url: "",
+    has_key: false,
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -68,8 +70,9 @@ export default function SettingsPage() {
         const data = await getLlmSettings();
         setSettings({
           provider: data.provider,
-          api_key: data.api_key || "",
+          api_key: "",
           base_url: data.base_url || "",
+          has_key: data.has_key,
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load settings");
@@ -100,15 +103,44 @@ export default function SettingsPage() {
     setSaving(true);
 
     try {
-      await saveLlmSettings({
+      const savedSettings = await saveLlmSettings({
         provider: settings.provider,
-        api_key: settings.api_key,
+        api_key: settings.api_key.trim() || undefined,
         base_url: settings.base_url,
+      });
+      setSettings({
+        provider: savedSettings.provider,
+        api_key: "",
+        base_url: savedSettings.base_url || "",
+        has_key: savedSettings.has_key,
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save settings");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleClear = async () => {
+    setError(null);
+    setSaved(false);
+    setSaving(true);
+
+    try {
+      await clearLlmSettings();
+      const resetSettings = await getLlmSettings();
+      setSettings({
+        provider: resetSettings.provider,
+        api_key: "",
+        base_url: resetSettings.base_url || "",
+        has_key: resetSettings.has_key,
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to clear settings");
     } finally {
       setSaving(false);
     }
@@ -161,10 +193,17 @@ export default function SettingsPage() {
               >
                 {saving ? "Saving..." : "Save Settings"}
               </button>
+              <button
+                onClick={handleClear}
+                disabled={saving}
+                className="py-2.5 px-6 bg-white text-slate-700 font-medium rounded-lg border border-slate-300 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm transition-colors"
+              >
+                Revoke Key
+              </button>
             </div>
 
             <p className="mt-4 text-xs text-slate-500">
-              Your API keys are stored only in your browser. They are sent to the backend per-request and never persisted on the server.
+              API keys are stored server-side and are never returned to the browser. Enter a new key to rotate it.
             </p>
           </div>
         </div>

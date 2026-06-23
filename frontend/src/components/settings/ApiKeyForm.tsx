@@ -7,8 +7,9 @@ interface ApiKeyFormProps {
     provider: string;
     api_key: string;
     base_url: string;
+    has_key: boolean;
   };
-  onChange: (settings: { provider: string; api_key: string; base_url: string }) => void;
+  onChange: (settings: { provider: string; api_key: string; base_url: string; has_key: boolean }) => void;
   providerDescriptions: Array<{
     key: string;
     label: string;
@@ -35,7 +36,7 @@ export function ApiKeyForm({
         </label>
         <select
           value={settings.provider}
-          onChange={(e) => onChange({ ...settings, provider: e.target.value })}
+          onChange={(e) => onChange({ ...settings, provider: e.target.value, api_key: "", has_key: false })}
           className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm bg-white"
         >
           {providerDescriptions.map((p) => (
@@ -70,14 +71,18 @@ export function ApiKeyForm({
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1.5">
             API Key
+            {settings.has_key && (
+              <span className="ml-2 font-normal text-green-600">Configured</span>
+            )}
           </label>
           <div className="relative">
             <input
               type={showKey ? "text" : "password"}
               value={settings.api_key}
               onChange={(e) => onChange({ ...settings, api_key: e.target.value })}
+              autoComplete="new-password"
               placeholder={
-                settings.provider === "ollama" ? "Not required for Ollama" : "sk-..."
+                settings.has_key ? "Enter a new key to rotate" : "sk-..."
               }
               className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm pr-10"
             />
@@ -90,6 +95,9 @@ export function ApiKeyForm({
               {showKey ? "Hide" : "Show"}
             </button>
           </div>
+          <p className="mt-1.5 text-xs text-slate-500">
+            Saved keys are write-only. This field is blank unless you are rotating the key.
+          </p>
         </div>
       )}
 

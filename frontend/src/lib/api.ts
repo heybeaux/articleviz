@@ -112,13 +112,13 @@ export async function uploadArticle(
 
 export class LLMSettings {
   provider: string;
-  api_key: string;
   base_url: string;
+  has_key: boolean;
 
   constructor(data: LLMSettings) {
     this.provider = data.provider;
-    this.api_key = data.api_key;
     this.base_url = data.base_url;
+    this.has_key = data.has_key;
   }
 }
 
@@ -138,10 +138,10 @@ export class LLMResponseData {
 
 export async function saveLlmSettings(settings: {
   provider: string;
-  api_key: string;
+  api_key?: string;
   base_url: string;
 }): Promise<LLMSettings> {
-  const data = await apiPost<LLMSettings, { provider: string; api_key: string; base_url: string }>(
+  const data = await apiPost<LLMSettings, { provider: string; api_key?: string; base_url: string }>(
     "/api/settings/llm",
     settings
   );
@@ -154,8 +154,7 @@ export async function getLlmSettings(): Promise<LLMSettings> {
 }
 
 export async function clearLlmSettings(): Promise<void> {
-  const endpoint = BACKEND_URL ? `${BACKEND_URL}/api/settings/llm` : "/api/settings/llm";
-  await fetch(endpoint, { method: "DELETE" });
+  await request<LLMSettings>("/api/settings/llm", { method: "DELETE" });
 }
 
 export async function checkOllama(): Promise<{ available: boolean }> {
@@ -255,7 +254,6 @@ export async function processArticle(
   articleId: string,
   paragraphs: string[],
   provider: string,
-  apiKey: string,
   baseUrl: string = "",
   model: string = ""
 ): Promise<AnalysisResponse> {
@@ -263,12 +261,11 @@ export async function processArticle(
     article_id: string;
     paragraphs: string[];
     provider: string;
-    api_key: string;
     base_url: string;
     model: string;
   }>(
     "/api/process?sync=true",
-    { article_id: articleId, paragraphs, provider, api_key: apiKey, base_url: baseUrl, model }
+    { article_id: articleId, paragraphs, provider, base_url: baseUrl, model }
   );
   return new AnalysisResponse(data);
 }
@@ -301,4 +298,3 @@ export async function getArticle(articleId: string): Promise<ArticleResult> {
     analysis: data.analysis ? new AnalysisResponse(data.analysis) : undefined,
   };
 }
-
