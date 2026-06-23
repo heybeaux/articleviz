@@ -116,7 +116,7 @@ export default function Home() {
     try {
       const settings = await getLlmSettings();
 
-      if (!settings.api_key && settings.provider !== "ollama") {
+      if (!settings.has_key && settings.provider !== "ollama") {
         setError("API key is not configured. Please set it in Settings.");
         return;
       }
@@ -125,7 +125,6 @@ export default function Home() {
         result.article_id,
         result.paragraphs,
         settings.provider || "openai",
-        settings.api_key,
         settings.base_url || "",
         ""
       );

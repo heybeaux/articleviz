@@ -1,48 +1,56 @@
-import os
-
 from fastapi import APIRouter, HTTPException
 
-from app.models import LLMSettingsRequest, LLMSettingsResponse
+from app.models import LLMKeyRotationRequest, LLMSettingsRequest, LLMSettingsResponse
+from app.services import llm_settings
 from app.services.llm import check_ollama_available
 
 router = APIRouter()
 
-_llm_settings: dict = {
-    "provider": os.getenv("LLM_PROVIDER", "ollama"),
-    "api_key": os.getenv("LLM_API_KEY", ""),
-    "base_url": os.getenv("LLM_BASE_URL", ""),
-}
+
+def _safe_response() -> LLMSettingsResponse:
+    settings = llm_settings.get_settings()
+    return LLMSettingsResponse(
+        provider=settings.provider,
+        base_url=settings.base_url,
+        has_key=llm_settings.key_store.has_api_key(settings.provider),
+    )
 
 
 @router.post("/api/settings/llm", response_model=LLMSettingsResponse)
 async def save_llm_settings(request: LLMSettingsRequest):
-    _llm_settings["provider"] = request.provider
-    _llm_settings["api_key"] = request.api_key
-    _llm_settings["base_url"] = request.base_url
+    try:
+        llm_settings.save_settings(
+            provider=request.provider,
+            api_key=request.api_key,
+            base_url=request.base_url,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=llm_settings.redact_secrets(e))
+    return _safe_response()
 
-    return LLMSettingsResponse(
-        provider=_llm_settings["provider"],
-        api_key=_llm_settings["api_key"],
-        base_url=_llm_settings["base_url"],
-    )
+
+@router.post("/api/settings/llm/rotate", response_model=LLMSettingsResponse)
+async def rotate_llm_key(request: LLMKeyRotationRequest):
+    try:
+        llm_settings.rotate_api_key(
+            provider=request.provider,
+            api_key=request.api_key,
+            base_url=request.base_url,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=llm_settings.redact_secrets(e))
+    return _safe_response()
 
 
 @router.get("/api/settings/llm", response_model=LLMSettingsResponse)
 async def get_llm_settings():
-    return LLMSettingsResponse(
-        provider=_llm_settings["provider"],
-        api_key=_llm_settings["api_key"],
-        base_url=_llm_settings["base_url"],
-    )
+    return _safe_response()
 
 
-@router.delete("/api/settings/llm")
+@router.delete("/api/settings/llm", response_model=LLMSettingsResponse)
 async def clear_llm_settings():
-    _llm_settings["provider"] = os.getenv("LLM_PROVIDER", "ollama")
-    _llm_settings["api_key"] = os.getenv("LLM_API_KEY", "")
-    _llm_settings["base_url"] = os.getenv("LLM_BASE_URL", "")
-
-    return {"status": "cleared"}
+    llm_settings.clear_settings()
+    return _safe_response()
 
 
 @router.get("/api/settings/ollama/check")
